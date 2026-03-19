@@ -1,28 +1,42 @@
 "use client"
 import { Message, MessageContent, MessageResponse } from "./ai-elements/message";
-import { 
-    PromptInput, 
-    PromptInputBody, 
-    PromptInputFooter, 
-    PromptInputSelect, 
-    PromptInputSelectContent, 
-    PromptInputSelectItem, 
-    PromptInputSelectTrigger, 
-    PromptInputSelectValue, 
-    PromptInputSubmit, 
-    PromptInputTextarea, 
-    PromptInputTools 
+import {
+    PromptInput,
+    PromptInputBody,
+    PromptInputFooter,
+    PromptInputSubmit,
+    PromptInputTextarea,
+    PromptInputTools
 } from "./ai-elements/prompt-input";
-import { useEffect, useRef, useState } from "react";
+import {
+    ModelSelector,
+    ModelSelectorContent,
+    ModelSelectorEmpty,
+    ModelSelectorGroup,
+    ModelSelectorInput,
+    ModelSelectorItem,
+    ModelSelectorList,
+    ModelSelectorLogo,
+    ModelSelectorLogoGroup,
+    ModelSelectorName,
+    ModelSelectorTrigger
+} from "./ai-elements/model-selector";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import axios from "axios";
 import { Conversation, ConversationContent, ConversationScrollButton } from "./ai-elements/conversation";
 import { Shimmer } from "./ai-elements/shimmer";
-import NextImage from "next/image";
 import { CurioGeniusLogo } from "./logo";
+import { Check } from "@phosphor-icons/react";
+import { toast } from "sonner";
+import ApproveAgent from "./approve-agent";
 
 const models = [
-    { id: "gpt-4o", name: "GPT-4o" },
-    { id: "claude-opus-4", name: "Claude 4 Opus" },
+    { id: "devstral-latest", name: "Devstral", provider: "mistral" },
+    { id: "devstral-medium-latest", name: "Devstral Medium", provider: "mistral" },
+    { id: "mistral-vibe-cli-latest", name: "Mistral Vibe CLI", provider: "mistral" },
+    // { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", provider: "google" },
+    // { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro", provider: "google" },
 ];
 
 const ChatPage = () => {
@@ -34,10 +48,14 @@ const ChatPage = () => {
     // });
     const [text, setText] = useState("")
     const [model, setModel] = useState<string>(models[0].id);
+    const [prevModel, setPrevModel] = useState<string>(models[0].id)
     const [messages, setMessages] = useState<{ role: "user" | "assistant" | "system", text: string }[]>([])
     const [isLoading, setIsLoading] = useState(false)
     const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+    const [bizAgentState, setBizAgentState] = useState<"approve" | "modify" | "">("")
+
+    const selectedModel = models.find(m => m.id === model) || models[0];
 
     const loadingMessages = [
         "Thinking...",
@@ -59,15 +77,17 @@ const ChatPage = () => {
             setMessages(currentMessages)
             setText("")
 
-            console.log("Sending request with messages:", currentMessages)
-            const res = await axios.post("http://localhost:8080/invocations", {
-                messages: currentMessages
+            console.log("Sending request with prompt:", text)
+            const res = await axios.post("http://localhost:8080/start-biz-agent", {
+                user_id: "user_123",
+                prompt: text
             })
 
-            console.log("Response received:")
-            console.log(res.data.content)
+            // console.log("Response received:")
+            // console.log(res.data)
 
-            setMessages([...currentMessages, { role: "assistant", text: res.data.content }])
+            const responseText = res.data.business_output || res.data.error || "No response received.";
+            setMessages([...currentMessages, { role: "assistant", text: responseText }])
 
             // const agentOutputs = res.data.agents
             // Object.entries(agentOutputs).forEach(([agent, text]) => {
@@ -101,6 +121,22 @@ const ChatPage = () => {
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }, [messages])
+
+    useEffect(() => {
+        const changeModel = async () => {
+            try {
+                const res = await axios.post("http://localhost:8080/change-model", {
+                    model
+                })
+                toast.success(res.data.message)
+            } catch (error) {
+                console.error("API Error:", error)
+                toast.error("Failed to change model")
+                setModel(prevModel)
+            }
+        }
+        changeModel()
+    }, [model])
 
     return (
         <div className="flex flex-col h-full w-full min-w-0 bg-background">
@@ -139,6 +175,7 @@ const ChatPage = () => {
                                 ))}
                             </ConversationContent>
                             <ConversationScrollButton />
+                            
                         </Conversation>
                         {isLoading && (
                             <div className="mt-4 break-words w-full px-4">
@@ -149,6 +186,7 @@ const ChatPage = () => {
                         )}
                     </>
                 )}
+                {messages.some((m) => m.role === "assistant") && <ApproveAgent />}
                 <div ref={messagesEndRef} />
             </div>
 
@@ -163,23 +201,38 @@ const ChatPage = () => {
 
                     <PromptInputFooter>
                         <PromptInputTools>
-                            <PromptInputSelect
-                                onValueChange={(value: unknown) => {
-                                    setModel(value as string);
-                                }}
-                                value={model}
-                            >
-                                <PromptInputSelectTrigger>
-                                    <PromptInputSelectValue />
-                                </PromptInputSelectTrigger>
-                                <PromptInputSelectContent>
-                                    {models.map((model) => (
-                                        <PromptInputSelectItem key={model.id} value={model.id}>
-                                            {model.name}
-                                        </PromptInputSelectItem>
-                                    ))}
-                                </PromptInputSelectContent>
-                            </PromptInputSelect>
+                            <ModelSelector>
+                                <ModelSelectorTrigger
+                                    render={
+                                        <button className="flex items-center gap-2 px-2 py-1.5 text-xs font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors outline-none h-8 rounded-md" />
+                                    }
+                                >
+                                    <ModelSelectorLogo provider={selectedModel.provider} />
+                                    <span>{selectedModel.name}</span>
+                                    <ChevronDown className="size-3 text-muted-foreground" />
+                                </ModelSelectorTrigger>
+                                <ModelSelectorContent>
+                                    <ModelSelectorInput placeholder="Search models..." />
+                                    <ModelSelectorList>
+                                        <ModelSelectorEmpty>No models found.</ModelSelectorEmpty>
+                                        <ModelSelectorGroup heading="Mistral">
+                                            {models.map((m) => (
+                                                <ModelSelectorItem
+                                                    key={m.id}
+                                                    onSelect={() => { setPrevModel(model); setModel(m.id) }}
+                                                    value={m.id}
+                                                    disabled={m.provider === "google"}
+                                                >
+                                                    <ModelSelectorLogo provider={m.provider} />
+                                                    <ModelSelectorName>{m.name}</ModelSelectorName>
+                                                    <ModelSelectorLogoGroup><ModelSelectorLogo provider={m.provider} /></ModelSelectorLogoGroup>
+                                                    {selectedModel === m ? <Check className="ml-auto size-4" /> : <div className="ml-auto size-4" />}
+                                                </ModelSelectorItem>
+                                            ))}
+                                        </ModelSelectorGroup>
+                                    </ModelSelectorList>
+                                </ModelSelectorContent>
+                            </ModelSelector>
                         </PromptInputTools>
                         <PromptInputSubmit disabled={isLoading || !text.trim()} />
                     </PromptInputFooter>
