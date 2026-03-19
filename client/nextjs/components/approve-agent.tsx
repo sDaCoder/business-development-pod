@@ -13,17 +13,64 @@ import { CheckIcon, XIcon } from "lucide-react";
 import { nanoid } from "nanoid";
 import { Input } from "./ui/input";
 import { useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
 
 
-const ApproveAgent = () => {
-    const [feedback, setFeedback] = useState("")
-    
-    const handleModify = () => {
+const ApproveAgent = ({ 
+    projectId, 
+    isLoading, 
+    setIsLoading,
+    messages,
+    setMessages,
+    setBizAgentApproval
+}: { 
+    projectId: string, 
+    isLoading: boolean, 
+    setIsLoading: (value: boolean) => void 
+    messages: { role: "user" | "assistant" | "system", text: string }[],
+    setMessages: (value: { role: "user" | "assistant" | "system", text: string }[]) => void,
+    setBizAgentApproval: (value: boolean) => void
+}) => {
+    const [feedback, setFeedback] = useState<string>("")
+
+    const handleModify = async () => {
         // In production, call respondToConfirmationRequest with approved: false
+        try {
+            setFeedback("")
+            setIsLoading(true)
+            const res = await axios.post("http://localhost:8080/biz-agent-feedback", {
+                project_id: projectId,
+                action: "modify",
+                feedback
+            })
+            setMessages([...messages, { role: res.data.role || "assistant", text: res.data.content }])
+            toast.success("Your business plan is being modified...")
+        } catch (error) {
+            console.error("API Error:", error)
+            toast.error("Failed to modify business plan")
+        } finally {
+            setIsLoading(false)
+        }
     };
-    
-    const handleApprove = () => {
+
+    const handleApprove = async () => {
         // In production, call respondToConfirmationRequest with approved: true
+        try {
+            setIsLoading(true)
+            setBizAgentApproval(true)
+            toast.success("Your business plan is being approved...")
+            const res = await axios.post("http://localhost:8080/biz-agent-feedback", {
+                project_id: projectId,
+                action: "approve"
+            })
+            setMessages([...messages, { role: res.data.role || "assistant", text: res.data.content }])
+        } catch (error) {
+            console.error("API Error:", error)
+            toast.error("Failed to approve business plan")
+        } finally {
+            setIsLoading(false)
+        }
 
     };
     return (
@@ -37,7 +84,10 @@ const ApproveAgent = () => {
                     </code> */}
                         <div className="w-full py-2">
                             Want any changes in the above generated business plan?
-                            <Input className="mt-2" placeholder="Comment for any changes..." />
+                            <Input
+                                value={feedback}
+                                onChange={(e) => setFeedback(e.target.value)}
+                                className="mt-2" placeholder="Comment for any changes..." />
                         </div>
                     </ConfirmationRequest>
                     {/* <ConfirmationAccepted>
@@ -50,10 +100,10 @@ const ApproveAgent = () => {
                     </ConfirmationRejected> */}
                 </ConfirmationTitle>
                 <ConfirmationActions>
-                    <ConfirmationAction onClick={handleModify} variant="outline">
-                        Reject
+                    <ConfirmationAction disabled={isLoading || !feedback.trim()} onClick={handleModify} variant="outline">
+                        Modify
                     </ConfirmationAction>
-                    <ConfirmationAction onClick={handleApprove} variant="default">
+                    <ConfirmationAction disabled={feedback.trim() !== ""} onClick={handleApprove} variant="default">
                         Approve
                     </ConfirmationAction>
                 </ConfirmationActions>

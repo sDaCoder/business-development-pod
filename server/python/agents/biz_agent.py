@@ -15,7 +15,7 @@ biz_agent: Agent = Agent(
         - user stories
         - acceptance criteria
 
-        Return structured JSON:
+        Return structured format(not in JSON, but in user readable form) containing these important topics:
 
         {
             "project_summary": "",
@@ -24,7 +24,6 @@ biz_agent: Agent = Agent(
             "acceptance_criteria": []
         }
 
-        Overall output should be in markdown containg the JSON in this format...
     """,
     tools=[current_time, websearch]
 )

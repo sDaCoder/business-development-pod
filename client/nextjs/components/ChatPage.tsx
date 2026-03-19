@@ -21,7 +21,7 @@ import {
     ModelSelectorName,
     ModelSelectorTrigger
 } from "./ai-elements/model-selector";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import axios from "axios";
 import { Conversation, ConversationContent, ConversationScrollButton } from "./ai-elements/conversation";
@@ -53,7 +53,8 @@ const ChatPage = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [loadingMessageIndex, setLoadingMessageIndex] = useState(0)
     const messagesEndRef = useRef<HTMLDivElement>(null)
-    const [bizAgentState, setBizAgentState] = useState<"approve" | "modify" | "">("")
+    const [bizAgentApproval, setBizAgentApproval] = useState<boolean>(false)
+    const [projectId, setProjectId] = useState<string>("")
 
     const selectedModel = models.find(m => m.id === model) || models[0];
 
@@ -88,6 +89,7 @@ const ChatPage = () => {
 
             const responseText = res.data.business_output || res.data.error || "No response received.";
             setMessages([...currentMessages, { role: "assistant", text: responseText }])
+            setProjectId(res.data.project_id)
 
             // const agentOutputs = res.data.agents
             // Object.entries(agentOutputs).forEach(([agent, text]) => {
@@ -166,7 +168,7 @@ const ChatPage = () => {
                             <ConversationContent>
                                 {messages.map((message, index) => (
                                     <Message from={message.role} key={index}>
-                                        <MessageContent className="break-words max-w-full">
+                                        <MessageContent className="break-words max-w-full dark:group-[.is-user]:bg-zinc-900">
                                             <MessageResponse className="break-words overflow-hidden max-w-full text-foreground/90 leading-relaxed">
                                                 {message.text}
                                             </MessageResponse>
@@ -186,7 +188,16 @@ const ChatPage = () => {
                         )}
                     </>
                 )}
-                {messages.some((m) => m.role === "assistant") && <ApproveAgent />}
+                {messages.some((m) => m.role === "assistant") && !bizAgentApproval && (
+                    <ApproveAgent 
+                        projectId={projectId} 
+                        isLoading={isLoading} 
+                        setIsLoading={setIsLoading}
+                        messages={messages}
+                        setMessages={setMessages}
+                        setBizAgentApproval={setBizAgentApproval}
+                    />
+                )}
                 <div ref={messagesEndRef} />
             </div>
 
@@ -234,7 +245,7 @@ const ChatPage = () => {
                                 </ModelSelectorContent>
                             </ModelSelector>
                         </PromptInputTools>
-                        <PromptInputSubmit disabled={isLoading || !text.trim()} />
+                        <PromptInputSubmit disabled={isLoading || !text.trim() || bizAgentApproval} />
                     </PromptInputFooter>
                 </PromptInput>
             </div>
