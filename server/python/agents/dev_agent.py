@@ -1,3 +1,4 @@
+from tools.websearch import websearch
 from strands import Agent, tool
 from strands_tools import current_time, file_write
 from ai_models.mistral_model import mistral_model as model
@@ -22,8 +23,9 @@ dev_agent: Agent = Agent(
 
         Task:
         1. Parse the provided API schema.
-        2. Generate production-ready FastAPI code for the backend.
-        3. Use clean architecture principles.
+        2. Browse the internet to find the necessary documentation of FastAPI and understand the folder structure.
+        3. Generate production-ready FastAPI code for the backend.
+        4. Use clean architecture principles.
 
     """,
     # 4. ALWAYS call the upload_file_local tool to save the generated code to the local directory.
@@ -37,7 +39,7 @@ dev_agent: Agent = Agent(
     #     ]
     # }
     # Do not just output code blocks; you MUST use the tool to persist the files.
-    tools=[file_write]
+    tools=[websearch, current_time]
 )
 
 design_input = """

@@ -3,12 +3,14 @@ import {
 	SidebarContent,
 	SidebarGroup,
 	SidebarGroupContent,
-	SidebarGroupLabel,
+	// SidebarGroupLabel,
 	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	SidebarSeparator,
 } from "@/components/ui/sidebar"
+// import { Input } from "@/components/ui/input"
 import { ChatCircle, Gear, User } from "@phosphor-icons/react/dist/ssr"
 import { CurioGeniusLogo } from "@/components/logo"
 
@@ -56,23 +58,41 @@ export function AppSidebar() {
 					</SidebarGroupContent>
 				</SidebarGroup>
 
+				<SidebarSeparator />
+
+				{/* <SidebarGroup>
+					<SidebarGroupLabel className="text-xs font-semibold text-foreground/70">Mistral API</SidebarGroupLabel>
+					<SidebarGroupContent className="px-2 pb-2">
+						<div className="flex flex-col gap-1.5 p-2 rounded-md bg-accent/20 border border-border/40">
+							<Input 
+								id="mistral-api-key" 
+								type="password" 
+								placeholder="Mistral API Key" 
+								className="h-7 text-xs bg-background border-none shadow-none focus-visible:ring-1 focus-visible:ring-primary/20 placeholder:text-muted-foreground/50"
+							/>
+						</div>
+					</SidebarGroupContent>
+				</SidebarGroup> */}
+
+				<SidebarSeparator />
+
 				<SidebarGroup>
-					<SidebarGroupLabel>Recent Chats</SidebarGroupLabel>
+					{/* <SidebarGroupLabel>Recent Chats</SidebarGroupLabel> */}
 					<SidebarGroupContent>
 						<SidebarMenu>
 							{/* Place holder for chats */}
-							<SidebarMenuItem>
+							{/* <SidebarMenuItem>
 								<SidebarMenuButton render={<a href="#" />}>
 									<ChatCircle />
 									<span>Chat - Marketing plan</span>
 								</SidebarMenuButton>
-							</SidebarMenuItem>
-							<SidebarMenuItem>
+							</SidebarMenuItem> */}
+							{/* <SidebarMenuItem>
 								<SidebarMenuButton render={<a href="#" />}>
 									<ChatCircle />
 									<span>Chat - App Ideas</span>
 								</SidebarMenuButton>
-							</SidebarMenuItem>
+							</SidebarMenuItem> */}
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>

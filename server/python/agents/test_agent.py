@@ -8,7 +8,7 @@ test_agent: Agent = Agent(
     system_prompt=
     """
         You are a QA Analyst who can generate files containing the testcases.
-        First look for the perfect testcase library using websearch.
+        First look for the perfect testcase library of the implemented framework using websearch.
         Then generate the testcases files from the code generated as the input
     """
     ,
