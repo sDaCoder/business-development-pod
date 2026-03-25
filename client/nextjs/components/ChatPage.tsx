@@ -1,5 +1,5 @@
 "use client"
-import { Message, MessageContent, MessageResponse } from "./ai-elements/message";
+import { Message, MessageAction, MessageContent, MessageResponse } from "./ai-elements/message";
 import {
     PromptInput,
     PromptInputBody,
@@ -21,13 +21,13 @@ import {
     ModelSelectorName,
     ModelSelectorTrigger
 } from "./ai-elements/model-selector";
-import { useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import axios from "axios";
 import { Conversation, ConversationContent, ConversationScrollButton } from "./ai-elements/conversation";
 import { Shimmer } from "./ai-elements/shimmer";
 import { CurioGeniusLogo } from "./logo";
-import { Check } from "@phosphor-icons/react";
+import { Check, CopyIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import ApproveAgent from "./approve-agent";
 
@@ -173,11 +173,16 @@ const ChatPage = () => {
                                                 {message.text}
                                             </MessageResponse>
                                         </MessageContent>
+                                        {message.role === "assistant" && (
+                                            <MessageAction>
+                                                <CopyAction content={message.text} />
+                                            </MessageAction>
+                                        )}
                                     </Message>
                                 ))}
                             </ConversationContent>
                             <ConversationScrollButton />
-                            
+
                         </Conversation>
                         {isLoading && (
                             <div className="mt-4 break-words w-full px-4">
@@ -189,9 +194,9 @@ const ChatPage = () => {
                     </>
                 )}
                 {messages.some((m) => m.role === "assistant") && !bizAgentApproval && (
-                    <ApproveAgent 
-                        projectId={projectId} 
-                        isLoading={isLoading} 
+                    <ApproveAgent
+                        projectId={projectId}
+                        isLoading={isLoading}
                         setIsLoading={setIsLoading}
                         messages={messages}
                         setMessages={setMessages}
@@ -252,5 +257,29 @@ const ChatPage = () => {
         </div>
     )
 }
+
+interface CopyActionProps {
+    content: string;
+}
+
+const handleCopy = (content: string) => {
+    navigator.clipboard.writeText(content);
+};
+
+
+const CopyAction = memo(({ content }: CopyActionProps) => {
+    const handleClick = useCallback(() => handleCopy(content), [content]);
+    return (
+        <MessageAction
+            label="Copy"
+            onClick={handleClick}
+            tooltip="Copy to clipboard"
+        >
+            <CopyIcon className="size-4 rounded-full" />
+        </MessageAction>
+    );
+});
+
+CopyAction.displayName = "CopyAction";
 
 export default ChatPage

@@ -44,8 +44,8 @@ const ApproveAgent = ({
                 action: "modify",
                 feedback
             })
-            setMessages([...messages, { role: res.data.role || "assistant", text: res.data.content }])
-            toast.success("Your business plan is being modified...")
+            setMessages([...messages, { role: res.data.role || "assistant", text: res.data.business_output || res.data.content }])
+            toast.success("Your business plan has been modified.")
         } catch (error) {
             console.error("API Error:", error)
             toast.error("Failed to modify business plan")
