@@ -1,6 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
+import { Badge, badgeVariants } from "@/components/ui/badge";
 import type { CarouselApi } from "@/components/ui/carousel";
 import {
   Carousel,
@@ -62,14 +62,23 @@ export const InlineCitationCardTrigger = ({
   className,
   ...props
 }: InlineCitationCardTriggerProps) => (
-  <HoverCardTrigger render={<Badge className={cn("ml-1 rounded-full", className)} variant="secondary" {...props} />}>{sources[0] ? (
-            <>
-              {new URL(sources[0]).hostname}{" "}
-              {sources.length > 1 && `+${sources.length - 1}`}
-            </>
-          ) : (
-            "unknown"
-          )}</HoverCardTrigger>
+  <HoverCardTrigger
+    render={
+      <span
+        className={cn(badgeVariants({ variant: "secondary" }), "ml-1 rounded-full", className)}
+        {...props}
+      />
+    }
+  >
+    {sources[0] ? (
+      <>
+        {new URL(sources[0]).hostname}{" "}
+        {sources.length > 1 && `+${sources.length - 1}`}
+      </>
+    ) : (
+      "unknown"
+    )}
+  </HoverCardTrigger>
 );
 
 export type InlineCitationCardBodyProps = ComponentProps<"div">;

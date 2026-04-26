@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
@@ -55,7 +55,17 @@ export const CheckpointTrigger = ({
 }: CheckpointTriggerProps) =>
   tooltip ? (
     <Tooltip>
-      <TooltipTrigger render={<Button size={size} type="button" variant={variant} {...props} />}>{children}</TooltipTrigger>
+      <TooltipTrigger
+        {...props}
+        render={
+          <button
+            className={cn(buttonVariants({ size, variant }))}
+            type="button"
+          />
+        }
+      >
+        {children}
+      </TooltipTrigger>
       <TooltipContent align="start" side="bottom">
         {tooltip}
       </TooltipContent>

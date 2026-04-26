@@ -1,7 +1,7 @@
 "use client";
 
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -235,10 +235,18 @@ export const MicSelectorTrigger = ({
   }, [setWidth]);
 
   return (
-    <PopoverTrigger render={<Button variant="outline" {...props} ref={ref} />}>{children}<ChevronsUpDownIcon
-                className="shrink-0 text-muted-foreground"
-                size={16}
-              /></PopoverTrigger>
+    <PopoverTrigger
+      {...props}
+      render={
+        <button
+          className={cn(buttonVariants({ variant: "outline" }))}
+          ref={ref}
+        />
+      }
+    >
+      {children}
+      <ChevronsUpDownIcon className="shrink-0 text-muted-foreground" size={16} />
+    </PopoverTrigger>
   );
 };
 
