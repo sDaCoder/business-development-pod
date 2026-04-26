@@ -66,7 +66,7 @@ const ChatPage = () => {
         "Almost there...",
     ]
 
-    const onSubmit = async (e) => {
+    const onSubmit = async () => {
         if (!text.trim() || isLoading) return;
 
         try {
@@ -202,7 +202,7 @@ const ChatPage = () => {
             </div>
 
             <div className="w-full px-8 pb-8 pt-4 bg-background z-10 shrink-0">
-                <PromptInput onSubmit={(e) => onSubmit(e)} >
+                <PromptInput onSubmit={onSubmit} >
                     <PromptInputBody>
                         <PromptInputTextarea
                             onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)}
