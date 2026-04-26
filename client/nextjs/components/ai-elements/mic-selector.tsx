@@ -208,6 +208,7 @@ export type MicSelectorTriggerProps = ComponentProps<typeof Button>;
 
 export const MicSelectorTrigger = ({
   children,
+  className,
   ...props
 }: MicSelectorTriggerProps) => {
   const { setWidth } = useContext(MicSelectorContext);
@@ -236,11 +237,11 @@ export const MicSelectorTrigger = ({
 
   return (
     <PopoverTrigger
-      {...props}
       render={
         <button
-          className={cn(buttonVariants({ variant: "outline" }))}
+          className={cn(buttonVariants({ variant: "outline" }), className as string)}
           ref={ref}
+          {...props}
         />
       }
     >

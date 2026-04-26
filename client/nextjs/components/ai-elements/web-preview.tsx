@@ -113,20 +113,22 @@ export const WebPreviewNavigationButton = ({
   disabled,
   tooltip,
   children,
+  className,
   ...props
 }: WebPreviewNavigationButtonProps) => (
   <TooltipProvider>
     <Tooltip>
       <TooltipTrigger
-        {...props}
         render={
           <button
             className={cn(
               buttonVariants({ size: "sm", variant: "ghost" }),
-              "h-8 w-8 p-0 hover:text-foreground"
+              "h-8 w-8 p-0 hover:text-foreground",
+              className as string
             )}
             disabled={disabled}
             onClick={onClick}
+            {...props}
           />
         }
       >

@@ -51,16 +51,17 @@ export const CheckpointTrigger = ({
   variant = "ghost",
   size = "sm",
   tooltip,
+  className,
   ...props
 }: CheckpointTriggerProps) =>
   tooltip ? (
     <Tooltip>
       <TooltipTrigger
-        {...props}
         render={
           <button
-            className={cn(buttonVariants({ size, variant }))}
+            className={cn(buttonVariants({ size, variant }), className as string)}
             type="button"
+            {...props}
           />
         }
       >
